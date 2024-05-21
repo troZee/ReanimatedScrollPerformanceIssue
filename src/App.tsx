@@ -5,8 +5,15 @@
  * @format
  */
 
-import React, {useMemo} from 'react';
-import {StyleSheet, View} from 'react-native';
+import React, {
+  Dispatch,
+  SetStateAction,
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
+import {View} from 'react-native';
 
 import Animated, {
   useSharedValue,
@@ -14,11 +21,22 @@ import Animated, {
 } from 'react-native-reanimated';
 import {PickerText} from './PickerText';
 
-const cellSize = 36;
 const renderCount = 10;
 export const EMPTY_CHAR = '‎';
 
-function App(): React.JSX.Element {
+type PickerContext = {
+  cellSize: number;
+  setCellSize: Dispatch<SetStateAction<number>>;
+};
+
+const INITIAL_CELL_SIZE = 36;
+const PickerContext = createContext<PickerContext>({
+  cellSize: INITIAL_CELL_SIZE,
+  setCellSize: () => {},
+});
+
+function Root(): React.JSX.Element {
+  const {cellSize, setCellSize} = useContext(PickerContext);
   const translationY = useSharedValue(0);
 
   const scrollHandler = useAnimatedScrollHandler(event => {
@@ -48,7 +66,12 @@ function App(): React.JSX.Element {
         }}
         onScroll={scrollHandler}>
         {paddedItems.map((_, x) => (
-          <View key={x} style={{height: cellSize}}>
+          <View
+            style={{paddingVertical: 8}}
+            onLayout={
+              x > 0 ? undefined : e => setCellSize(e.nativeEvent.layout.height)
+            }
+            key={x}>
             <PickerText
               renderCount={renderCount}
               scrollProgress={translationY}
@@ -62,23 +85,24 @@ function App(): React.JSX.Element {
   );
 }
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+function App() {
+  const [cellSize, setCellSize] = useState(INITIAL_CELL_SIZE);
+  const [isReady, setIsReady] = useState(false);
+
+  return (
+    <PickerContext.Provider
+      value={{
+        cellSize,
+        setCellSize: size => {
+          setIsReady(true);
+          setCellSize(size);
+        },
+      }}>
+      <View style={{opacity: isReady ? 1 : 0}}>
+        <Root />
+      </View>
+    </PickerContext.Provider>
+  );
+}
 
 export default App;
