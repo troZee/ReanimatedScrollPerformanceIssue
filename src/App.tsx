@@ -13,13 +13,22 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import {View} from 'react-native';
 
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
 } from 'react-native-reanimated';
 import {PickerText} from './PickerText';
+import {TamaguiProvider, View, createTamagui} from 'tamagui';
+import {config} from '@tamagui/config/v3';
+const tamaguiConfig = createTamagui(config);
+
+// make TypeScript type everything based on your config
+type Conf = typeof tamaguiConfig;
+declare module 'tamagui' {
+  // or 'tamagui'
+  interface TamaguiCustomConfig extends Conf {}
+}
 
 const renderCount = 10;
 export const EMPTY_CHAR = '‎';
@@ -90,18 +99,20 @@ function App() {
   const [isReady, setIsReady] = useState(false);
 
   return (
-    <PickerContext.Provider
-      value={{
-        cellSize,
-        setCellSize: size => {
-          setIsReady(true);
-          setCellSize(size);
-        },
-      }}>
-      <View style={{opacity: isReady ? 1 : 0}}>
-        <Root />
-      </View>
-    </PickerContext.Provider>
+    <TamaguiProvider config={tamaguiConfig}>
+      <PickerContext.Provider
+        value={{
+          cellSize,
+          setCellSize: size => {
+            setIsReady(true);
+            setCellSize(size);
+          },
+        }}>
+        <View style={{opacity: isReady ? 1 : 0}}>
+          <Root />
+        </View>
+      </PickerContext.Provider>
+    </TamaguiProvider>
   );
 }
 
