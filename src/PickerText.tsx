@@ -2,7 +2,8 @@ import React from 'react';
 import type {SharedValue} from 'react-native-reanimated';
 import Animated, {useAnimatedStyle} from 'react-native-reanimated';
 import {interpolateLinear, interpolateSin} from './interpolate';
-import {Text, ViewProps} from 'react-native';
+import {ViewProps} from 'react-native';
+import {Text} from 'tamagui';
 
 const PICKER_TEXT_MIN_OPACITY = 0.2;
 const PICKER_MIN_SCALE = 0.85;
@@ -74,6 +75,7 @@ function PickerText({
               translateY: PICKER_TEXT_TRANSLATE_Y,
             },
           ],
+          color: 'white',
         },
         animatedStyle,
       ]}
